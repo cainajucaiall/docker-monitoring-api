@@ -1,0 +1,56 @@
+version: '3.8'
+
+networks:
+  monitoring:
+    driver: bridge
+
+  teste:
+    driver: host
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+services:
+  # API fora do Docker Compose pois ela vai rodar sem Docker
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.95.0
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./config/otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "8888:8888"
+      - "8889:8889"
+      - "13133:13133"
+      - "4317:4317"  # Porta exposta para conexao com sua API
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090  # Porta exposta para acesso externo
+    command:
+      - '--config.file=/etc/prometheus/prometheus-w10.yml'
+    volumes:
+      - ./config/prometheus-w10.yml:/etc/prometheus/prometheus-w10.yml
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    # network_mode: "host"  # Adicionado para conectar à rede do host
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - '3000:3000'  # Porta 5000 exposta para acesso externo
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - monitoring

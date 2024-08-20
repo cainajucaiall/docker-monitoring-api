@@ -1,0 +1,14 @@
+# Usar uma imagem base do Windows 10
+FROM mcr.microsoft.com/windows:10.0.19042.1165
+
+# Definir o diretório de trabalho
+WORKDIR /app
+
+# Baixar o Windows Exporter
+ADD https://github.com/prometheus-community/windows_exporter/releases/download/v0.20.0/windows_exporter-0.20.0-amd64.exe /app/windows_exporter.exe
+
+# Expor a porta que será usada pelo Windows Exporter
+EXPOSE 9190
+
+# Comando para iniciar o Windows Exporter
+CMD ["C:\\app\\windows_exporter.exe", "--collectors.enabled=cpu,cs,logical_disk,net,os,service,system", "--web.listen-address=:9190"]
