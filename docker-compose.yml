@@ -33,7 +33,8 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     restart: unless-stopped
-    # network_mode: "host"  # Configura o Prometheus para usar a rede host
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
     networks:
       - monitoring
 
